@@ -1,3 +1,30 @@
+"""
+KGroot Neural Network Models
+============================
+
+This module contains the core neural network architectures for KGroot:
+
+1. GraphConvolution: Multi-layer Graph Convolutional Network (GCN) layer
+   - Supports multiple adjacency matrices (multi-relational graphs)
+   - Uses basis decomposition for parameter efficiency
+   - Handles both feature-based and featureless inputs
+
+2. GraphSimilarity: Main model for graph similarity learning
+   - Takes two graphs as input (online vs knowledge base)
+   - Uses separate GCNs for each graph
+   - Applies pooling and attention mechanisms
+   - Outputs similarity score (binary classification)
+
+3. GraphSimilarity_No_Gcn: Ablation model without GCN layers
+4. GraphSimilarity_No_KB: Ablation model without knowledge base
+
+Key Concepts:
+- Multi-relational graphs: Multiple adjacency matrices capture different relationship types
+- Basis decomposition: Reduces parameters by sharing weights across relationship types
+- Graph pooling: Aggregates node-level features to graph-level representations
+- Attention mechanisms: Learns which components are most important for similarity
+"""
+
 import logging
 
 import torch
@@ -17,20 +44,25 @@ class GraphConvolution(nn.Module):
                  weights=None, W_regularizer=None, num_bases=-1,
                  b_regularizer=None, bias=False, dropout=0., max_node_num=100, **kwargs)   :
         """
-
-        :param input_dim: 输入维度，有特征矩阵时对应初始特征矩阵的词嵌入维度，无特征矩阵时，对应输入结点个数
-        :param output_dim:  超参数，隐藏层的units数目
-        :param support:  A 的长度 感觉应该是  边种类数 * 2 + 1
-        :param featureless: 使用或者忽略输入的features
-        :param init:
-        :param activation: 激活函数
-        :param weights:
-        :param W_regularizer:
-        :param num_bases:  使用的bases数量 （-1：all）
-        :param b_regularizer:
-        :param bias:
-        :param dropout:
-        :param kwargs:
+        Multi-relational Graph Convolutional Network Layer
+        
+        This layer implements graph convolution for multi-relational graphs where
+        multiple adjacency matrices represent different types of relationships.
+        
+        Key Innovation: Basis Decomposition
+        - Instead of learning separate weights for each relationship type
+        - Uses basis decomposition: W = Σ(basis_i * coefficient_i)
+        - Reduces parameters from O(input_dim * output_dim * num_relations) 
+          to O(input_dim * output_dim * num_bases)
+        
+        Args:
+            input_dim: Input feature dimension (100 for our Bank dataset)
+            output_dim: Hidden layer dimension (64 in our config)
+            support: Number of adjacency matrices (3 for our dataset)
+            featureless: Whether to use input features (False for our case)
+            num_bases: Number of basis vectors for weight sharing (30 in config)
+            dropout: Dropout rate for regularization (0.2 in config)
+            max_node_num: Maximum number of nodes for padding (128 in config)
         """
         super(GraphConvolution, self).__init__()
         # self.init = initializations.get(init)
