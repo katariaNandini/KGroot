@@ -7,7 +7,7 @@
 # dist/
 
 # # Virtual envs
-# .venv/
+.venv/
 # venv/
 # ENV/
 
@@ -28,7 +28,7 @@
 # bank_from_bank/pickle_data/
 
 # # Environment and secrets
-# .env
+.env
 # .env.*
 # Ignore all virtual environments
 venv/
